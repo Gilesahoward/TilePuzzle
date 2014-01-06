@@ -1,9 +1,14 @@
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -11,96 +16,87 @@ import java.util.Set;
 
 public class Grid {
 
-	static int width;
-	static int height;
+	int width;
+	int height;
+	State2 initialState;
+	State2 finalState;
+	Node initial;
 
-	static LinkedHashMap <String, Position> initialBlockPositions;
-	static Position initialAgentPosition;
-
-	static LinkedHashMap <String, Position> finalBlockPositions;
-
-
-	public static void initSquareGrid(int n)
+	public Grid(int dimension)
 	{
-		initGrid(n, n);
-	}
+		width = height = dimension;
+		int squared = dimension*dimension;
+		int squaredMinus = squared - dimension;
+		int[] state = new int[squared];
 
-	public static void initGrid(int width, int height)
-	{
-		Grid.width = width;
-		Grid.height = height;
-
-		Grid.initialBlockPositions = new LinkedHashMap<String, Position>();
-		Grid.initialAgentPosition = new Position(width-1, 0);
-		Grid.finalBlockPositions = new LinkedHashMap<String, Position>();
-
-		char[] blocks = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-
-		for(int i = 0; i < width-1; i++)
+		for(int i = 0; i < squaredMinus; i++)
 		{
-			initialBlockPositions.put(String.valueOf(blocks[i]), new Position(i, 0));
+			state[i] = 0;
 		}
-
-
-		int currentElement = 1;
-		for(String s : initialBlockPositions.keySet())
-		{	
-			finalBlockPositions.put(s, new Position(1, height - 1 - currentElement));
-			currentElement += 1;
-
-		}
-
-
-
-	}
-
-	public static void printInitialPositions()
-	{
-		for(String s : initialBlockPositions.keySet())
+		int j = 1;
+		for(int i = squaredMinus; i < squaredMinus+3; i++)
 		{
-			Position temp = initialBlockPositions.get(s);
-			System.out.println("Block: " + s + " occupies position (" + temp.getX() + "," + temp.getY() + ")");
+			state[i] = j;
+			j++;
 		}
-	}
+		state[squared-1] = -1;
 
-	public static void printFinalPositions()
-	{
-		for(String s : finalBlockPositions.keySet())
+		initialState = new State2(state, dimension, squared - 1);
+
+		int[] finalState = new int[squared];
+
+		ArrayList<Integer> columns = new ArrayList<Integer>();
+		for(int i = 0; i < dimension*dimension; i++)
 		{
-			Position temp = finalBlockPositions.get(s);
-			System.out.println("Block: " + s + " occupies position (" + temp.getX() + "," + temp.getY() + ")");
-		}
-	}
-
-	public static State generateBaseState()
-	{
-		return new State(new LinkedHashMap<String, Position>(initialBlockPositions), new Position(initialAgentPosition));
-	}
-
-	public static Node generateBaseNode()
-	{
-		return new Node(generateBaseState());
-	}
-
-	public static State generateFinalState()
-	{
-		return new State(new LinkedHashMap<String, Position>(finalBlockPositions), new Position(initialAgentPosition));
-	}
-
-	public static Node bfs(Node n, State goal)
-	{
-		Queue<Node> queue = new LinkedList<Node>();
-		HashSet<State> set = new HashSet<State>();
-
-		queue.add(n);
-		set.add(n.getState());
-
-		while(!queue.isEmpty())
-		{
-			Node temp = queue.poll();
-			if(temp.getState().equals(goal))
+			if((i % dimension)== 1 && i > dimension)
 			{
-				Deque<Grid.Direction> stack = new ArrayDeque<Grid.Direction>();
+				columns.add(i);
+			}
+		}
+
+		int count = 3;
+		while(!columns.isEmpty() && count != 0)
+		{
+			finalState[columns.get(columns.size()-1)] = count;
+			columns.remove(columns.size()-1);
+			count--;
+		}
+
+
+
+		finalState[squared-1] = -1;
+
+		this.finalState = new State2(finalState, dimension, squared - 1);
+
+		System.out.println(Arrays.toString(state));
+		System.out.println(Arrays.toString(finalState));
+
+		initial = new Node(initialState);
+
+	}
+
+
+	public Node dfs()
+	{
+		Deque<Node> stack = new ArrayDeque<Node>();
+		Set<Node> set = new HashSet<Node>();
+
+
+		stack.addFirst(initial);
+		//	set.add(initial);
+
+
+		while(!stack.isEmpty())
+		{
+
+			Node temp = stack.removeFirst();
+			//System.out.println(Arrays.toString(temp.state.state));
+			/*	System.out.println("Set contains: " + set.size());
+			System.out.println("Queue contains: " + queue.size());*/
+			if(temp.getState().equals(finalState))
+			{
+				System.out.println("Success, ending");
+				/*				Deque<Grid.Direction> stack = new ArrayDeque<Grid.Direction>();
 				stack.add(temp.getDirection());
 				Node temp2 = temp.parent;
 
@@ -113,15 +109,69 @@ public class Grid {
 				for(Grid.Direction d : stack)
 				{
 					System.out.println(d);
+				}*/
+				return temp;
+			}
+			if(!set.contains(temp))
+			{
+				set.add(temp);
+				for(Node child : temp.successors())
+				{
+					stack.addFirst(child);
 				}
+
+			}
+		}
+		return null;
+	}
+
+
+	public Node bfs()
+	{
+		Queue<Node> queue = new ArrayDeque<Node>();
+		Set<Node> set = new HashSet<Node>();
+
+		queue.add(initial);
+		set.add(initial);
+
+
+		while(!queue.isEmpty())
+		{
+
+			Node temp = queue.poll();
+			//System.out.println(Arrays.toString(temp.state.state));
+			/*	System.out.println("Set contains: " + set.size());
+			System.out.println("Queue contains: " + queue.size());*/
+			if(temp.getState().equals(finalState))
+			{
+				System.out.println("Success, ending");
+				/*				Deque<Grid.Direction> stack = new ArrayDeque<Grid.Direction>();
+				stack.add(temp.getDirection());
+				Node temp2 = temp.parent;
+
+				while(temp2.getParent() != null)
+				{
+					stack.addFirst(temp2.getDirection());
+					temp2 = temp2.getParent();
+				}
+
+				for(Grid.Direction d : stack)
+				{
+					System.out.println(d);
+				}*/
 				return temp;
 			}
 			for(Node child : temp.successors())
 			{
-				if(!set.contains(child.getState()))
-				{
-					set.add(child.getState());
+				//System.out.println(temp.successors().size());
+				if(!(set.contains(child)))
+				{//System.out.println("State not already seen!");
+					set.add(child);
 					queue.add(child);
+				}
+				else
+				{
+					//System.out.println("State already seen!");
 				}
 			}
 		}
@@ -129,16 +179,167 @@ public class Grid {
 
 	}
 
+	public Node iddfs_helper(Integer i)
+	{		
+
+		Deque<Node> stack = new ArrayDeque<Node>();
+		//Set<Node> set = new HashSet<Node>();
+
+
+		stack.addFirst(initial);
+
+		while(!stack.isEmpty())
+		{
+			Node temp = stack.removeFirst();
+
+			if(temp.cost <= i)
+			{
+
+				if(temp.getState().equals(finalState)) return temp;
+				else
+				{
+					//set.add(temp);
+					for(Node n: temp.successors())
+					{
+						stack.addFirst(n);
+					}
+				}
+			}
+		}
+
+		return null;
+
+	}
+
+	public Node iddfs()
+	{
+		for(int i = 0; i < Integer.MAX_VALUE; i++)
+		{
+			Node answer;
+			if((answer = iddfs_helper(i)) != null) return answer;
+		}
+		return null;
+	}
+	
+	public ArrayList<Node> astar()
+	{
+		Set<State2> seen = new HashSet<State2>();
+		Queue<HeuristicNode> toConsider = new PriorityQueue<HeuristicNode>();
+		Map<Node, Node> routesTaken = new HashMap<Node, Node>();
+		
+		toConsider.add(new HeuristicNode(initial, heuristic(initial)));
+		
+		while(!toConsider.isEmpty())
+		{
+			HeuristicNode current = toConsider.poll();
+			System.out.println(Arrays.toString(current.state.state));
+			System.out.println(Arrays.toString(finalState.state));
+			if(current.state.equals(finalState))
+			{
+				System.out.println("map size: " + routesTaken.size());
+				System.out.println("current node cost: " + current.cost);
+				return reconstruct_route(routesTaken, new Node(current.state, current.parent, current.cost, current.direction));
+			}
+			
+			seen.add(current.state);
+			
+			for(Node n : current.successors())
+			{
+				if(!seen.contains(n.state))
+				{
+					HeuristicNode newN = new HeuristicNode(n, current.cost + heuristic(n));
+					routesTaken.put(current, n);
+					toConsider.add(newN);
+				}
+			}
+		}
+		return null;
+		
+	}
+	
+	public ArrayList<Node> reconstruct_route(Map<Node, Node> map, Node to)
+	{
+		if(map.containsKey(to))
+		{
+			ArrayList<Node> list = reconstruct_route(map, map.get(to));
+			list.add(to);
+			return list;
+		}
+		else
+		{
+			ArrayList<Node> list = new ArrayList<Node>();
+			list.add(to);
+			return list;
+		}
+	}
+	 
+	public int heuristic(Node n)
+	{
+		int total = 0;
+		for(int i = 1; i <= 3; i++)
+		{
+			
+			
+			int current = -1;
+			int goalstate = -1;
+			for(int z = 0; z < n.state.state.length; z++)
+			{
+				if(n.state.state[z] == i) 
+					{ current = z; break; }
+			}
+			
+			for(int z = 0; z < finalState.state.length; z++)
+			{
+				if(finalState.state[z] == i) { goalstate = z; break; }
+			}
+			
+			
+			int currentx = current % width;
+			int currenty = (int) Math.floor(current/width);
+			
+			
+			
+			int goalx = goalstate % width;
+			int goaly = (int) Math.floor(goalstate/width);
+		
+			
+			total += Math.abs(currentx-goalx ) + Math.abs(currenty - goaly);
+			
+			
+		}
+		total += n.cost;
+		return total;
+	}
+
 	public static void main(String args[])
 	{
-		Grid.initSquareGrid(5);
+		Grid four = new Grid(4);
+		ArrayList<Node> blah = four.astar();
+		System.out.println(blah.size());
+		//System.out.println(Arrays.toString(four.initialState.state));
+/*		long start =System.currentTimeMillis();
+		System.out.println("Cost of bfs: " + four.bfs().cost);
+		System.out.println("Time taken in ms for bfs: " + (System.currentTimeMillis() - start));
+
+		long start2 = System.currentTimeMillis();
+		System.out.println("Cost of dfs: " + four.dfs().cost);
+		System.out.println("Time taken in ms for dfs: " + (System.currentTimeMillis() - start2));
+
+		long start3 = System.currentTimeMillis();
+		System.out.println("Cost of iddfs: " + four.iddfs().cost);
+		System.out.println("Time taken in ms for iddfs: " + (System.currentTimeMillis() - start3));
+		
+		
+		*/
+		
+		/*		Grid.initSquareGrid(5);
 
 		long start =System.currentTimeMillis();
 		Node n = Grid.bfs(Grid.generateBaseNode(), Grid.generateFinalState());
 		System.out.println(System.currentTimeMillis() - start);
 		System.out.println(n.getState().toString());
 		System.out.println(n.getCost());
-
+		 */
 	}
 
 	public enum Direction

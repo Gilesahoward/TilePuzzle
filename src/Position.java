@@ -1,4 +1,4 @@
-
+/*
 public class Position {
 
 	private int x;
@@ -112,3 +112,4 @@ public class Position {
 	}
 
 }
+*/

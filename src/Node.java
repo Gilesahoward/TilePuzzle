@@ -3,20 +3,20 @@ import java.util.ArrayList;
 
 public class Node{
 
-	State currentState;
+	State2 state;
 	Node parent;
 	int cost;
 	Grid.Direction direction;
 	
 	
-	public Node(State currentState)
+	public Node(State2 currentState)
 	{
 		this(currentState, null, 0, null);
 	}
 
-	public Node(State currentState, Node parent, int cost, Grid.Direction direction)
+	public Node(State2 currentState, Node parent, int cost, Grid.Direction direction)
 	{
-		this.currentState = currentState;
+		this.state = currentState;
 		this.parent = parent;
 		this.cost = cost;
 		this.direction = direction;
@@ -24,37 +24,39 @@ public class Node{
 	
 	public ArrayList<Node> successors()
 	{
-		ArrayList<Node> temp = new ArrayList<Node>(4);
-		State left = currentState.goLeft();
-		State up = currentState.goUp();
-		State right = currentState.goRight();
-		State down = currentState.goDown();
-		
+		ArrayList<Node> temp = new ArrayList<Node>();
+		State2 left = state.goLeft();
+		State2 up = state.goUp();
+		State2 right = state.goRight();
+		State2 down = state.goDown();
+
 		if(up != null)
 		{
 			temp.add(new Node(up, this, cost+1, Grid.Direction.UP));
-		}
-		if(left != null)
-		{
-			temp.add(new Node(left, this, cost+1, Grid.Direction.LEFT));
 		}
 		if(down != null)
 		{
 			temp.add(new Node(down, this, cost+1, Grid.Direction.DOWN));
 		}
+
+		if(left != null)
+		{
+			temp.add(new Node(left, this, cost+1, Grid.Direction.LEFT));
+		}
+
+
 		if(right != null)
 		{
 			temp.add(new Node(right, this, cost+1, Grid.Direction.RIGHT));
 		}
-
-
-		
 		return temp;
+
+	
 	}
 	
-	public State getState()
+	public State2 getState()
 	{
-		return currentState;
+		return state;
 	}
 	
 	public Node getParent()
@@ -74,10 +76,9 @@ public class Node{
 
 	@Override
 	public int hashCode() {
-		final int prime = 372111;
+		final int prime = 57777;
 		int result = 1;
-		result = prime * result
-				+ ((currentState == null) ? 0 : currentState.hashCode());
+		result = prime * result + ((state == null) ? 0 : state.hashCode());
 		return result;
 	}
 
@@ -90,10 +91,10 @@ public class Node{
 		if (getClass() != obj.getClass())
 			return false;
 		Node other = (Node) obj;
-		if (currentState == null) {
-			if (other.currentState != null)
+		if (state == null) {
+			if (other.state != null)
 				return false;
-		} else if (!currentState.equals(other.currentState))
+		} else if (!state.equals(other.state))
 			return false;
 		return true;
 	}
