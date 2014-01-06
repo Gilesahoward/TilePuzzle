@@ -221,11 +221,11 @@ public class Grid {
 		return null;
 	}
 	
-	public ArrayList<Node> astar()
+	public Node astar()
 	{
 		Set<State2> seen = new HashSet<State2>();
 		Queue<HeuristicNode> toConsider = new PriorityQueue<HeuristicNode>();
-		Map<Node, Node> routesTaken = new HashMap<Node, Node>();
+		//Map<Node, Node> routesTaken = new HashMap<Node, Node>();
 		
 		toConsider.add(new HeuristicNode(initial, heuristic(initial)));
 		
@@ -236,9 +236,10 @@ public class Grid {
 			System.out.println(Arrays.toString(finalState.state));
 			if(current.state.equals(finalState))
 			{
-				System.out.println("map size: " + routesTaken.size());
+				//System.out.println("map size: " + routesTaken.size());
 				System.out.println("current node cost: " + current.cost);
-				return reconstruct_route(routesTaken, new Node(current.state, current.parent, current.cost, current.direction));
+				return current;
+				//return reconstruct_route(routesTaken, new Node(current.state, current.parent, current.cost, current.direction));
 			}
 			
 			seen.add(current.state);
@@ -248,7 +249,7 @@ public class Grid {
 				if(!seen.contains(n.state))
 				{
 					HeuristicNode newN = new HeuristicNode(n, current.cost + heuristic(n));
-					routesTaken.put(current, n);
+					//routesTaken.put(current, n);
 					toConsider.add(newN);
 				}
 			}
@@ -314,10 +315,10 @@ public class Grid {
 	public static void main(String args[])
 	{
 		Grid four = new Grid(4);
-		ArrayList<Node> blah = four.astar();
-		System.out.println(blah.size());
+		Node blah = four.astar();
+		System.out.println(blah.cost);
 		//System.out.println(Arrays.toString(four.initialState.state));
-/*		long start =System.currentTimeMillis();
+		long start =System.currentTimeMillis();
 		System.out.println("Cost of bfs: " + four.bfs().cost);
 		System.out.println("Time taken in ms for bfs: " + (System.currentTimeMillis() - start));
 
@@ -330,7 +331,7 @@ public class Grid {
 		System.out.println("Time taken in ms for iddfs: " + (System.currentTimeMillis() - start3));
 		
 		
-		*/
+		
 		
 		/*		Grid.initSquareGrid(5);
 

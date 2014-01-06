@@ -1,153 +1,138 @@
-/*import java.util.LinkedHashMap;
-import java.util.Map.Entry;
+import java.util.Arrays;
 
 
 public class State {
 
-	LinkedHashMap<String, Position> blockLocations;
-	Position agentLocation;
-	
-	public State(LinkedHashMap<String, Position> LinkedHashMap, Position agentLocation)
+	int[] state;
+	Integer dimension;
+	int agent;
+
+	public State(int[] state, Integer dimension, int agent)
 	{
-		this.blockLocations = LinkedHashMap;
-		this.agentLocation = agentLocation;
-	}
-	
-	public LinkedHashMap<String, Position> getBlockLocations()
-	{
-		return blockLocations;
-	}
-	
-	public void setBlockLocations(LinkedHashMap<String, Position> blockLocations)
-	{
-		this.blockLocations = blockLocations;
-	}
-	
-	public Position getAgentLocation()
-	{
-		return agentLocation;
+		this.state = state;
+		this.dimension = dimension;
+		this.agent = agent;
 	}
 
-	public void setAgentLocation(Position agentLocation)
+	public State(State old)
 	{
-		this.agentLocation = agentLocation;
+		this.state = old.state;
+		this.dimension = old.dimension;
+		this.agent = old.agent;
 	}
-	
+
 	public State goLeft()
 	{
-		Position left = agentLocation.goLeft();
-		if(left == null)
+		if(agent % dimension == 0)
 		{
 			return null;
 		}
-		
-		LinkedHashMap<String, Position> newPositions = new LinkedHashMap<String, Position>(blockLocations);
-		
-		for(Entry<String, Position> entry : newPositions.entrySet())
+		else
 		{
-			if(entry.getValue().equals(left))
+			int[] newState = Arrays.copyOf(state, state.length);
+			if(newState[agent-1] != 0)
 			{
-				//System.out.println("Positions equal. Forcing tile to the right.");
-				entry.setValue(entry.getValue().goRight());
-				//System.out.println("New position for tile: " + entry.getValue().toString());
+				int temp = newState[agent-1];
+				newState[agent-1] = newState[agent];
+				newState[agent] = temp;
 			}
+			else
+			{
+				newState[agent-1] = -1;
+				newState[agent] = 0;
+			}
+
+			return new State(newState, dimension, agent-1);
 		}
-		
-		return new State(newPositions, left);
 	}
-	
+
 	public State goUp()
 	{
-		Position up = agentLocation.goUp();
-		if(up == null)
+		if(agent-dimension < 0)
 		{
 			return null;
 		}
-		
-		LinkedHashMap<String, Position> newPositions = new LinkedHashMap<String, Position>(blockLocations);
-		
-		for(Entry<String, Position> entry : newPositions.entrySet())
+		else
 		{
-			if(entry.getValue().equals(up))
-			{
-				//System.out.println("Positions equal. Forcing tile down.");
-				entry.setValue(entry.getValue().goDown());
-				//System.out.println("New position for tile: " + entry.getValue().toString());
-			}
-		}
-		
-		return new State(newPositions, up);
-	}
-	
-	public State goRight()
-	{
-		Position right = agentLocation.goRight();
-		if(right == null)
-		{
-			return null;
-		}
-		
-		LinkedHashMap<String, Position> newPositions = new LinkedHashMap<String, Position>(blockLocations);
-		
-		for(Entry<String, Position> entry : newPositions.entrySet())
-		{
-			if(entry.getValue().equals(right))
-			{
-			//	System.out.println("Positions equal. Forcing tile to the left.");
-				entry.setValue(entry.getValue().goLeft());
-			//	System.out.println("New position for tile: " + entry.getValue().toString());
-				
-			}
-		}
-		
-		return new State(newPositions, right);
-	}
-	
-	public State goDown()
-	{
-		Position down = agentLocation.goDown();
-		if(down == null)
-		{
-			return null;
-		}
-		
-		LinkedHashMap<String, Position> newPositions = new LinkedHashMap<String, Position>(blockLocations);
-		
-		for(Entry<String, Position> entry : newPositions.entrySet())
-		{
-			if(entry.getValue().equals(down))
+			int[] newState = Arrays.copyOf(state, state.length);
+			if(newState[agent-dimension] != 0)
 			{
 				//System.out.println("Positions equal. Forcing tile up.");
-				entry.setValue(entry.getValue().goUp());
-				//System.out.println("New position for tile: " + entry.getValue().toString());
-				
+				int temp = newState[agent-dimension];
+				newState[agent-dimension] = newState[agent];
+				newState[agent] = temp;
 			}
+
+			else
+			{
+				newState[agent-dimension] = -1;
+				newState[agent] = 0;
+			}
+			return new State(newState, dimension, agent-dimension);
 		}
-		
-		return new State(newPositions, down);
+
 	}
 
-	
-	public String toString()
+	public State goRight()
 	{
-		String toReturn = "State representation. ";
-		for(Entry<String, Position> e : blockLocations.entrySet())
+		if(agent % dimension == dimension-1)
 		{
-			toReturn = toReturn + " " + "Block " + e.getKey().toString() + " located at Position " + e.getValue().toString(); 
+			return null;
 		}
-		toReturn = toReturn + "Agent Location: " + agentLocation.toString();
-		return toReturn;
+		else
+		{
+			int[] newState = Arrays.copyOf(state, state.length);
+			
+			if(newState[agent+1] != 0)
+			{
+				//System.out.println("Positions equal. Forcing tile right.");
+				int temp = newState[agent+1];
+				newState[agent+1] = newState[agent];
+				newState[agent] = temp;
+			}
+			else
+			{
+				newState[agent+1] = -1;
+				newState[agent] = 0;
+			}
+
+			return new State(newState, dimension, agent+1);
+		}
+
 	}
 
+	public State goDown()
+	{
+		if(agent+dimension > (dimension*dimension)-1 )
+		{
+			return null;
+		}
+		else
+		{
+			int[] newState = Arrays.copyOf(state, state.length);
+			if(newState[agent+dimension] != 0)
+			{
+				int temp = newState[agent+dimension];
+				newState[agent+dimension] = newState[agent];
+				newState[agent] = temp;
+			}
+			else
+			{
+				newState[agent+dimension] = -1;
+				newState[agent] = 0;
+			}
+
+			return new State(newState, dimension, agent+dimension);
+		}
+
+	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 372111;
+		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((agentLocation == null) ? 0 : agentLocation.hashCode());
-		result = prime * result
-				+ ((blockLocations == null) ? 0 : blockLocations.hashCode());
+		result = prime * result + agent;
+		result = prime * result + Arrays.hashCode(state);
 		return result;
 	}
 
@@ -160,18 +145,13 @@ public class State {
 		if (getClass() != obj.getClass())
 			return false;
 		State other = (State) obj;
-		if (agentLocation == null) {
-			if (other.agentLocation != null)
-				return false;
-		} else if (!agentLocation.equals(other.agentLocation))
+		if (agent != other.agent)
 			return false;
-		if (blockLocations == null) {
-			if (other.blockLocations != null)
-				return false;
-		} else if (!blockLocations.equals(other.blockLocations))
+		if (!Arrays.equals(state, other.state))
 			return false;
 		return true;
 	}
-	
+
+
+
 }
-*/

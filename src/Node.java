@@ -3,10 +3,10 @@ import java.util.ArrayList;
 
 public class Node{
 
-	State2 state;
-	Node parent;
-	int cost;
-	Grid.Direction direction;
+	private State2 state;
+	private Node parent;
+	private int cost;
+	private Grid.Direction direction;
 	
 	
 	public Node(State2 currentState)
