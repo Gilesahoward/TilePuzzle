@@ -3,18 +3,18 @@ import java.util.ArrayList;
 
 public class Node{
 
-	private State2 state;
+	private State state;
 	private Node parent;
 	private int cost;
 	private Grid.Direction direction;
 	
 	
-	public Node(State2 currentState)
+	public Node(State currentState)
 	{
 		this(currentState, null, 0, null);
 	}
 
-	public Node(State2 currentState, Node parent, int cost, Grid.Direction direction)
+	public Node(State currentState, Node parent, int cost, Grid.Direction direction)
 	{
 		this.state = currentState;
 		this.parent = parent;
@@ -25,10 +25,10 @@ public class Node{
 	public ArrayList<Node> successors()
 	{
 		ArrayList<Node> temp = new ArrayList<Node>();
-		State2 left = state.goLeft();
-		State2 up = state.goUp();
-		State2 right = state.goRight();
-		State2 down = state.goDown();
+		State left = state.goLeft();
+		State up = state.goUp();
+		State right = state.goRight();
+		State down = state.goDown();
 
 		if(up != null)
 		{
@@ -54,7 +54,7 @@ public class Node{
 	
 	}
 	
-	public State2 getState()
+	public State getState()
 	{
 		return state;
 	}

@@ -3,9 +3,9 @@ import java.util.Arrays;
 
 public class State {
 
-	int[] state;
-	Integer dimension;
-	int agent;
+	private int[] state;
+	private Integer dimension;
+	private int agent;
 
 	public State(int[] state, Integer dimension, int agent)
 	{
@@ -20,6 +20,7 @@ public class State {
 		this.dimension = old.dimension;
 		this.agent = old.agent;
 	}
+	
 
 	public State goLeft()
 	{
@@ -150,6 +151,30 @@ public class State {
 		if (!Arrays.equals(state, other.state))
 			return false;
 		return true;
+	}
+
+	public int[] getState() {
+		return state;
+	}
+
+	public void setState(int[] state) {
+		this.state = state;
+	}
+
+	public Integer getDimension() {
+		return dimension;
+	}
+
+	public void setDimension(Integer dimension) {
+		this.dimension = dimension;
+	}
+
+	public int getAgent() {
+		return agent;
+	}
+
+	public void setAgent(int agent) {
+		this.agent = agent;
 	}
 
 

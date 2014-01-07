@@ -1,3 +1,8 @@
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,8 +23,8 @@ public class Grid {
 
 	int width;
 	int height;
-	State2 initialState;
-	State2 finalState;
+	State initialState;
+	State finalState;
 	Node initial;
 
 	public Grid(int dimension)
@@ -41,7 +46,7 @@ public class Grid {
 		}
 		state[squared-1] = -1;
 
-		initialState = new State2(state, dimension, squared - 1);
+		initialState = new State(state, dimension, squared - 1);
 
 		int[] finalState = new int[squared];
 
@@ -66,7 +71,7 @@ public class Grid {
 
 		finalState[squared-1] = -1;
 
-		this.finalState = new State2(finalState, dimension, squared - 1);
+		this.finalState = new State(finalState, dimension, squared - 1);
 
 		System.out.println(Arrays.toString(state));
 		System.out.println(Arrays.toString(finalState));
@@ -76,11 +81,13 @@ public class Grid {
 	}
 
 
-	public Node dfs()
+	public Result dfs()
 	{
+		long startTime = System.currentTimeMillis();
 		Deque<Node> stack = new ArrayDeque<Node>();
 		Set<Node> set = new HashSet<Node>();
 
+		int nodesProcessed = 0;
 
 		stack.addFirst(initial);
 		//	set.add(initial);
@@ -90,27 +97,43 @@ public class Grid {
 		{
 
 			Node temp = stack.removeFirst();
+			nodesProcessed++;
 			//System.out.println(Arrays.toString(temp.state.state));
 			/*	System.out.println("Set contains: " + set.size());
 			System.out.println("Queue contains: " + queue.size());*/
 			if(temp.getState().equals(finalState))
 			{
-				System.out.println("Success, ending");
-				/*				Deque<Grid.Direction> stack = new ArrayDeque<Grid.Direction>();
-				stack.add(temp.getDirection());
-				Node temp2 = temp.parent;
+				long endTime = System.currentTimeMillis();
+				//System.out.println("Success, ending dfs: " + set.size());
+
+				Deque<Grid.Direction> pathStack = new ArrayDeque<Grid.Direction>();
+				pathStack.add(temp.getDirection());
+				Node temp2 = temp.getParent();
 
 				while(temp2.getParent() != null)
 				{
-					stack.addFirst(temp2.getDirection());
+					pathStack.addFirst(temp2.getDirection());
 					temp2 = temp2.getParent();
 				}
 
-				for(Grid.Direction d : stack)
+				StringBuilder pathTaken = new StringBuilder(pathStack.size());
+
+				if(pathStack.peek().toString().equals(null))
 				{
-					System.out.println(d);
-				}*/
-				return temp;
+
+				}
+				else
+				{
+					while(!pathStack.isEmpty())
+					{
+
+						pathTaken.append(pathStack.removeFirst().toString());
+					}
+				}
+
+				return new Result(pathTaken.toString(), nodesProcessed, startTime-endTime);
+
+				//return temp;
 			}
 			if(!set.contains(temp))
 			{
@@ -126,10 +149,13 @@ public class Grid {
 	}
 
 
-	public Node bfs()
+	public Result bfs()
 	{
+		long startTime = System.currentTimeMillis();
 		Queue<Node> queue = new ArrayDeque<Node>();
 		Set<Node> set = new HashSet<Node>();
+
+		int nodesProcessed = 0;
 
 		queue.add(initial);
 		set.add(initial);
@@ -139,12 +165,14 @@ public class Grid {
 		{
 
 			Node temp = queue.poll();
+			nodesProcessed++;
 			//System.out.println(Arrays.toString(temp.state.state));
 			/*	System.out.println("Set contains: " + set.size());
 			System.out.println("Queue contains: " + queue.size());*/
 			if(temp.getState().equals(finalState))
 			{
-				System.out.println("Success, ending");
+				long endTime = System.currentTimeMillis();
+				//System.out.println("Success, ending bfs: " + set.size());
 				/*				Deque<Grid.Direction> stack = new ArrayDeque<Grid.Direction>();
 				stack.add(temp.getDirection());
 				Node temp2 = temp.parent;
@@ -159,7 +187,32 @@ public class Grid {
 				{
 					System.out.println(d);
 				}*/
-				return temp;
+				Deque<Grid.Direction> pathStack = new ArrayDeque<Grid.Direction>();
+				pathStack.add(temp.getDirection());
+				Node temp2 = temp.getParent();
+
+				while(temp2.getParent() != null)
+				{
+					pathStack.addFirst(temp2.getDirection());
+					temp2 = temp2.getParent();
+				}
+
+				StringBuilder pathTaken = new StringBuilder(pathStack.size());
+
+				if(pathStack.peek().toString().equals(null))
+				{
+
+				}
+				else
+				{
+					while(!pathStack.isEmpty())
+					{
+
+						pathTaken.append(pathStack.removeFirst().toString());
+					}
+				}
+
+				return new Result(pathTaken.toString(), nodesProcessed, startTime-endTime);
 			}
 			for(Node child : temp.successors())
 			{
@@ -179,173 +232,324 @@ public class Grid {
 
 	}
 
-	public Node iddfs_helper(Integer i)
+	public Result iddfs_helper(Integer i)
 	{		
-
 		Deque<Node> stack = new ArrayDeque<Node>();
-		//Set<Node> set = new HashSet<Node>();
+		Set<Node> set = new HashSet<Node>();
 
+		int nodesProcessed = 0;
 
 		stack.addFirst(initial);
 
 		while(!stack.isEmpty())
 		{
-			Node temp = stack.removeFirst();
 
-			if(temp.cost <= i)
+			Node temp = stack.removeFirst();
+			nodesProcessed++;
+			if(temp.getCost() <= i)
 			{
 
-				if(temp.getState().equals(finalState)) return temp;
+				if(temp.getState().equals(finalState)) {
+					long endTime = System.currentTimeMillis();
+
+					Deque<Grid.Direction> pathStack = new ArrayDeque<Grid.Direction>();
+					pathStack.add(temp.getDirection());
+					Node temp2 = temp.getParent();
+
+					while(temp2.getParent() != null)
+					{
+						pathStack.addFirst(temp2.getDirection());
+						temp2 = temp2.getParent();
+					}
+
+					StringBuilder pathTaken = new StringBuilder(pathStack.size());
+
+					if(pathStack.peek().toString().equals(null))
+					{
+
+					}
+					else
+					{
+						while(!pathStack.isEmpty())
+						{
+
+							pathTaken.append(pathStack.removeFirst().toString());
+						}
+					}
+
+					return new Result(pathTaken.toString(), nodesProcessed, endTime);
+				}
+
 				else
 				{
-					//set.add(temp);
+					set.add(temp);
 					for(Node n: temp.successors())
 					{
-						stack.addFirst(n);
+						if(!set.contains(n))
+						{
+							stack.addFirst(n);
+							set.add(n);
+						}
 					}
 				}
 			}
 		}
 
-		return null;
+		return new Result("n", nodesProcessed, 0);
 
 	}
 
-	public Node iddfs()
+	public Result iddfs()
 	{
-		for(int i = 0; i < Integer.MAX_VALUE; i++)
+		long startTime = System.currentTimeMillis();
+
+		int nodesProcessed = 0;
+		for(int i = 1; i < Integer.MAX_VALUE; i += 1)
 		{
-			Node answer;
-			if((answer = iddfs_helper(i)) != null) return answer;
+			Result answer = iddfs_helper(i);
+			if(!answer.getPath().equals("n")) 
+			{
+				return new Result(answer.getPath(), nodesProcessed += answer.getNodesExpanded(), startTime - answer.getTimeTaken());
+			}
+			else
+			{
+				nodesProcessed += answer.getNodesExpanded();
+			}
 		}
 		return null;
 	}
-	
-	public Node astar()
+
+	public Result astar()
 	{
-		Set<State2> seen = new HashSet<State2>();
+		long startTime = System.currentTimeMillis();
+		Set<Node> seen = new HashSet<Node>();
 		Queue<HeuristicNode> toConsider = new PriorityQueue<HeuristicNode>();
 		//Map<Node, Node> routesTaken = new HashMap<Node, Node>();
-		
+
+		int nodesProcessed = 0;
+
 		toConsider.add(new HeuristicNode(initial, heuristic(initial)));
-		
+
 		while(!toConsider.isEmpty())
 		{
 			HeuristicNode current = toConsider.poll();
-			System.out.println(Arrays.toString(current.state.state));
-			System.out.println(Arrays.toString(finalState.state));
-			if(current.state.equals(finalState))
+			nodesProcessed++;
+			/*	System.out.println(Arrays.toString(current.state.state));
+			System.out.println(Arrays.toString(finalState.state));*/
+			if(current.getNode().getState().equals(finalState))
 			{
-				//System.out.println("map size: " + routesTaken.size());
-				System.out.println("current node cost: " + current.cost);
-				return current;
-				//return reconstruct_route(routesTaken, new Node(current.state, current.parent, current.cost, current.direction));
+				long endTime = System.currentTimeMillis();
+				Deque<Grid.Direction> pathStack = new ArrayDeque<Grid.Direction>();
+				pathStack.add(current.getNode().getDirection());
+				Node temp2 = current.getNode().getParent();
+
+				while(temp2.getParent() != null)
+				{
+					pathStack.addFirst(temp2.getDirection());
+					temp2 = temp2.getParent();
+				}
+
+				StringBuilder pathTaken = new StringBuilder(pathStack.size());
+
+				if(pathStack.peek().toString().equals(null))
+				{
+
+				}
+				else
+				{
+					while(!pathStack.isEmpty())
+					{
+
+						pathTaken.append(pathStack.removeFirst().toString());
+					}
+				}
+
+				return new Result(pathTaken.toString(), nodesProcessed, startTime-endTime);
 			}
-			
-			seen.add(current.state);
-			
+
+			seen.add(current.getNode());
+
 			for(Node n : current.successors())
 			{
-				if(!seen.contains(n.state))
+				if(!seen.contains(n))
 				{
-					HeuristicNode newN = new HeuristicNode(n, current.cost + heuristic(n));
+					HeuristicNode newN = new HeuristicNode(n, heuristic(n));
 					//routesTaken.put(current, n);
 					toConsider.add(newN);
 				}
 			}
 		}
 		return null;
-		
+
 	}
-	
-	public ArrayList<Node> reconstruct_route(Map<Node, Node> map, Node to)
-	{
-		if(map.containsKey(to))
-		{
-			ArrayList<Node> list = reconstruct_route(map, map.get(to));
-			list.add(to);
-			return list;
-		}
-		else
-		{
-			ArrayList<Node> list = new ArrayList<Node>();
-			list.add(to);
-			return list;
-		}
-	}
-	 
+
+
 	public int heuristic(Node n)
 	{
 		int total = 0;
 		for(int i = 1; i <= 3; i++)
 		{
-			
-			
+
+
 			int current = -1;
 			int goalstate = -1;
-			for(int z = 0; z < n.state.state.length; z++)
+			for(int z = 0; z < n.getState().getState().length; z++)
 			{
-				if(n.state.state[z] == i) 
-					{ current = z; break; }
+				if(n.getState().getState()[z] == i) 
+				{ current = z; break; }
 			}
-			
-			for(int z = 0; z < finalState.state.length; z++)
+
+			for(int z = 0; z < finalState.getState().length; z++)
 			{
-				if(finalState.state[z] == i) { goalstate = z; break; }
+				if(finalState.getState()[z] == i) { goalstate = z; break; }
 			}
-			
-			
+
+
 			int currentx = current % width;
 			int currenty = (int) Math.floor(current/width);
-			
-			
-			
+
+
+
 			int goalx = goalstate % width;
 			int goaly = (int) Math.floor(goalstate/width);
-		
-			
+
+
 			total += Math.abs(currentx-goalx ) + Math.abs(currenty - goaly);
-			
-			
+
+
 		}
-		total += n.cost;
+		total += n.getCost();
 		return total;
 	}
 
 	public static void main(String args[])
 	{
-		Grid four = new Grid(4);
-		Node blah = four.astar();
-		System.out.println(blah.cost);
+		try {
+			PrintWriter dfsWriter = new PrintWriter(new FileWriter("dfs.txt", true));
+			PrintWriter iddfsWriter = new PrintWriter(new FileWriter("iddfs.txt", true));
+			PrintWriter bfsWriter = new PrintWriter(new FileWriter("bfs.txt", true));
+			PrintWriter astarWriter = new PrintWriter(new FileWriter("astar.txt", true));
+
+			for(int i = 4; i < 20; i++)
+			{
+				long[] iddfs = new long[10];
+				long[] bfs = new long[10];
+				long[] dfs = new long[10];
+				long[] astar = new long[10];
+
+				for(int z = 0; z < 10; z++)
+				{
+					Grid test = new Grid(i);
+					Result r1 = test.iddfs();
+					iddfs[z] = r1.nodesExpanded;
+
+					Result r2 = test.bfs();
+					bfs[z] = r2.nodesExpanded;
+
+					Result r3 = test.dfs();
+					dfs[z] = r3.nodesExpanded;
+
+					Result r4 = test.astar();
+					astar[z] = r4.nodesExpanded;
+				}
+
+
+				StringBuilder dfsOutput = new StringBuilder();
+				dfsOutput.append("DFS for square grid of size: " + i);
+				for(int loop = 0; loop < 10; loop++)
+				{
+					dfsOutput.append(","+dfs[0]);
+				}
+
+				dfsWriter.println(dfsOutput.toString());
+				dfsWriter.flush();
+				
+				StringBuilder iddfsOutput = new StringBuilder();
+				iddfsOutput.append("IDDFS for square grid of size: " + i);
+				for(int loop = 0; loop < 10; loop++)
+				{
+					iddfsOutput.append(","+iddfs[0]);
+				}
+
+				iddfsWriter.println(iddfsOutput.toString());
+				iddfsWriter.flush();
+				
+				StringBuilder bfsOutput = new StringBuilder();
+				bfsOutput.append("bfs for square grid of size: " + i);
+				for(int loop = 0; loop < 10; loop++)
+				{
+					bfsOutput.append(","+bfs[0]);
+				}
+
+				bfsWriter.println(bfsOutput.toString());
+				bfsWriter.flush();
+				
+				StringBuilder astarOutput = new StringBuilder();
+				astarOutput.append("astar for square grid of size: " + i);
+				for(int loop = 0; loop < 10; loop++)
+				{
+					astarOutput.append(","+astar[0]);
+				}
+
+				astarWriter.println(astarOutput.toString());
+				astarWriter.flush();
+				
+				
+
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	/*Node blah = four.astar();
+		System.out.println(blah.getCost());
 		//System.out.println(Arrays.toString(four.initialState.state));
 		long start =System.currentTimeMillis();
-		System.out.println("Cost of bfs: " + four.bfs().cost);
+		four.bfs();
 		System.out.println("Time taken in ms for bfs: " + (System.currentTimeMillis() - start));
 
 		long start2 = System.currentTimeMillis();
-		System.out.println("Cost of dfs: " + four.dfs().cost);
+		four.dfs();
 		System.out.println("Time taken in ms for dfs: " + (System.currentTimeMillis() - start2));
 
 		long start3 = System.currentTimeMillis();
-		System.out.println("Cost of iddfs: " + four.iddfs().cost);
+		four.iddfs();
 		System.out.println("Time taken in ms for iddfs: " + (System.currentTimeMillis() - start3));
-		
-		
-		
-		
-		/*		Grid.initSquareGrid(5);
+
+		long start4 =System.currentTimeMillis();
+		four.astar();
+		System.out.println("Time taken in ms for astar: " + (System.currentTimeMillis() - start4));
+	 */
+
+
+
+	/*		Grid.initSquareGrid(5);
 
 		long start =System.currentTimeMillis();
 		Node n = Grid.bfs(Grid.generateBaseNode(), Grid.generateFinalState());
 		System.out.println(System.currentTimeMillis() - start);
 		System.out.println(n.getState().toString());
 		System.out.println(n.getCost());
-		 */
-	}
+	 */
+
 
 	public enum Direction
 	{
-		UP, DOWN, LEFT, RIGHT
+		UP, DOWN, LEFT, RIGHT;
+
+		public String toString()
+		{
+			switch(this)
+			{
+			case UP: return "U"; 
+			case DOWN: return "D"; 
+			case LEFT: return "L";
+			case RIGHT: return "R";
+			}
+			return null;
+		}
 	}
 }
 
