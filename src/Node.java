@@ -34,6 +34,7 @@ public class Node{
 		{
 			temp.add(new Node(up, this, cost+1, Grid.Direction.UP));
 		}
+
 		if(down != null)
 		{
 			temp.add(new Node(down, this, cost+1, Grid.Direction.DOWN));
@@ -43,8 +44,6 @@ public class Node{
 		{
 			temp.add(new Node(left, this, cost+1, Grid.Direction.LEFT));
 		}
-
-
 		if(right != null)
 		{
 			temp.add(new Node(right, this, cost+1, Grid.Direction.RIGHT));

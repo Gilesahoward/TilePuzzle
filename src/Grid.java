@@ -366,16 +366,19 @@ public class Grid {
 
 				return new Result(pathTaken.toString(), nodesProcessed, startTime-endTime);
 			}
-
-			seen.add(current.getNode());
-
-			for(Node n : current.successors())
+			else
 			{
-				if(!seen.contains(n))
+
+				seen.add(current.getNode());
+
+				for(Node n : current.getNode().successors())
 				{
-					HeuristicNode newN = new HeuristicNode(n, heuristic(n));
-					//routesTaken.put(current, n);
-					toConsider.add(newN);
+					if(!seen.contains(n))
+					{
+						HeuristicNode newN = new HeuristicNode(n, heuristic(n));
+						//routesTaken.put(current, n);
+						toConsider.add(newN);
+					}
 				}
 			}
 		}
@@ -389,8 +392,6 @@ public class Grid {
 		int total = 0;
 		for(int i = 1; i <= 3; i++)
 		{
-
-
 			int current = -1;
 			int goalstate = -1;
 			for(int z = 0; z < n.getState().getState().length; z++)
@@ -463,7 +464,7 @@ public class Grid {
 
 				dfsWriter.println(dfsOutput.toString());
 				dfsWriter.flush();
-				
+
 				StringBuilder iddfsOutput = new StringBuilder();
 				iddfsOutput.append("IDDFS for square grid of size: " + i);
 				for(int loop = 0; loop < 10; loop++)
@@ -473,7 +474,7 @@ public class Grid {
 
 				iddfsWriter.println(iddfsOutput.toString());
 				iddfsWriter.flush();
-				
+
 				StringBuilder bfsOutput = new StringBuilder();
 				bfsOutput.append("bfs for square grid of size: " + i);
 				for(int loop = 0; loop < 10; loop++)
@@ -483,7 +484,7 @@ public class Grid {
 
 				bfsWriter.println(bfsOutput.toString());
 				bfsWriter.flush();
-				
+
 				StringBuilder astarOutput = new StringBuilder();
 				astarOutput.append("astar for square grid of size: " + i);
 				for(int loop = 0; loop < 10; loop++)
@@ -493,8 +494,8 @@ public class Grid {
 
 				astarWriter.println(astarOutput.toString());
 				astarWriter.flush();
-				
-				
+
+
 
 			}
 		} catch (IOException e) {
