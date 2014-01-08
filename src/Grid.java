@@ -27,39 +27,39 @@ public class Grid {
 	State finalState;
 	Node initial;
 
-	public Grid(int dimension)
+	public Grid(short dimension)
 	{
 		width = height = dimension;
-		int squared = dimension*dimension;
-		int squaredMinus = squared - dimension;
-		int[] state = new int[squared];
+		short squared = (short) (dimension*dimension);
+		short squaredMinus = (short) (squared - dimension);
+		short[] state = new short[squared];
 
-		for(int i = 0; i < squaredMinus; i++)
+		for(short i = 0; i < squaredMinus; i++)
 		{
 			state[i] = 0;
 		}
-		int j = 1;
-		for(int i = squaredMinus; i < squaredMinus+3; i++)
+		short j = 1;
+		for(short i = squaredMinus; i < squaredMinus+3; i++)
 		{
 			state[i] = j;
 			j++;
 		}
 		state[squared-1] = -1;
 
-		initialState = new State(state, dimension, squared - 1);
+		initialState = new State(state, dimension, (short) (squared - 1));
 
-		int[] finalState = new int[squared];
+		short[] finalState = new short[squared];
 
 		ArrayList<Integer> columns = new ArrayList<Integer>();
-		for(int i = 0; i < dimension*dimension; i++)
+		for(short i = 0; i < dimension*dimension; i++)
 		{
 			if((i % dimension)== 1 && i > dimension)
 			{
-				columns.add(i);
+				columns.add((int) i);
 			}
 		}
 
-		int count = 3;
+		short count = 3;
 		while(!columns.isEmpty() && count != 0)
 		{
 			finalState[columns.get(columns.size()-1)] = count;
@@ -71,7 +71,7 @@ public class Grid {
 
 		finalState[squared-1] = -1;
 
-		this.finalState = new State(finalState, dimension, squared - 1);
+		this.finalState = new State(finalState, dimension, (short) (squared - 1));
 
 		System.out.println(Arrays.toString(state));
 		System.out.println(Arrays.toString(finalState));
@@ -431,66 +431,50 @@ public class Grid {
 			PrintWriter bfsWriter = new PrintWriter(new FileWriter("bfs.txt", true));
 			PrintWriter astarWriter = new PrintWriter(new FileWriter("astar.txt", true));
 
-			for(int i = 4; i < 20; i++)
+			for(short i = 4; i < 20; i++)
 			{
-				long[] iddfs = new long[10];
-				long[] bfs = new long[10];
-				long[] dfs = new long[10];
-				long[] astar = new long[10];
+				Grid test = new Grid(i);
+				Result r1 = test.iddfs();
+				long iddfs = r1.nodesExpanded;
 
-				for(int z = 0; z < 10; z++)
-				{
-					Grid test = new Grid(i);
-					Result r1 = test.iddfs();
-					iddfs[z] = r1.nodesExpanded;
+				Result r2 = test.bfs();
+				long bfs = r2.nodesExpanded;
 
-					Result r2 = test.bfs();
-					bfs[z] = r2.nodesExpanded;
+				Result r3 = test.dfs();
+				long dfs = r3.nodesExpanded;
 
-					Result r3 = test.dfs();
-					dfs[z] = r3.nodesExpanded;
-
-					Result r4 = test.astar();
-					astar[z] = r4.nodesExpanded;
-				}
+				Result r4 = test.astar();
+				long astar = r4.nodesExpanded;
 
 
 				StringBuilder dfsOutput = new StringBuilder();
 				dfsOutput.append("DFS for square grid of size: " + i);
-				for(int loop = 0; loop < 10; loop++)
-				{
-					dfsOutput.append(","+dfs[0]);
-				}
+
+				dfsOutput.append(","+dfs);
+
 
 				dfsWriter.println(dfsOutput.toString());
 				dfsWriter.flush();
 
 				StringBuilder iddfsOutput = new StringBuilder();
 				iddfsOutput.append("IDDFS for square grid of size: " + i);
-				for(int loop = 0; loop < 10; loop++)
-				{
-					iddfsOutput.append(","+iddfs[0]);
-				}
+
+				iddfsOutput.append(","+iddfs);
 
 				iddfsWriter.println(iddfsOutput.toString());
 				iddfsWriter.flush();
 
 				StringBuilder bfsOutput = new StringBuilder();
 				bfsOutput.append("bfs for square grid of size: " + i);
-				for(int loop = 0; loop < 10; loop++)
-				{
-					bfsOutput.append(","+bfs[0]);
-				}
+
+				bfsOutput.append(","+bfs);
 
 				bfsWriter.println(bfsOutput.toString());
 				bfsWriter.flush();
 
 				StringBuilder astarOutput = new StringBuilder();
 				astarOutput.append("astar for square grid of size: " + i);
-				for(int loop = 0; loop < 10; loop++)
-				{
-					astarOutput.append(","+astar[0]);
-				}
+				astarOutput.append(","+astar);
 
 				astarWriter.println(astarOutput.toString());
 				astarWriter.flush();

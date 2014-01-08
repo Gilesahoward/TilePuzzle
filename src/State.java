@@ -3,11 +3,11 @@ import java.util.Arrays;
 
 public class State {
 
-	private int[] state;
-	private Integer dimension;
+	private short[] state;
+	private short dimension;
 	private int agent;
 
-	public State(int[] state, Integer dimension, int agent)
+	public State(short[] state, short dimension, short agent)
 	{
 		this.state = state;
 		this.dimension = dimension;
@@ -30,10 +30,10 @@ public class State {
 		}
 		else
 		{
-			int[] newState = Arrays.copyOf(state, state.length);
+			short[] newState = Arrays.copyOf(state, state.length);
 			if(newState[agent-1] != 0)
 			{
-				int temp = newState[agent-1];
+				short temp = newState[agent-1];
 				newState[agent-1] = newState[agent];
 				newState[agent] = temp;
 			}
@@ -43,9 +43,10 @@ public class State {
 				newState[agent] = 0;
 			}
 
-			return new State(newState, dimension, agent-1);
+			return new State(newState, dimension, (short) (agent-1));
 		}
 	}
+
 
 	public State goUp()
 	{
@@ -55,11 +56,11 @@ public class State {
 		}
 		else
 		{
-			int[] newState = Arrays.copyOf(state, state.length);
+			short[] newState = Arrays.copyOf(state, state.length);
 			if(newState[agent-dimension] != 0)
 			{
 				//System.out.println("Positions equal. Forcing tile up.");
-				int temp = newState[agent-dimension];
+				short temp = newState[agent-dimension];
 				newState[agent-dimension] = newState[agent];
 				newState[agent] = temp;
 			}
@@ -69,7 +70,7 @@ public class State {
 				newState[agent-dimension] = -1;
 				newState[agent] = 0;
 			}
-			return new State(newState, dimension, agent-dimension);
+			return new State(newState, dimension, (short) (agent-dimension));
 		}
 
 	}
@@ -82,12 +83,12 @@ public class State {
 		}
 		else
 		{
-			int[] newState = Arrays.copyOf(state, state.length);
+			short[] newState = Arrays.copyOf(state, state.length);
 			
 			if(newState[agent+1] != 0)
 			{
 				//System.out.println("Positions equal. Forcing tile right.");
-				int temp = newState[agent+1];
+				short temp = newState[agent+1];
 				newState[agent+1] = newState[agent];
 				newState[agent] = temp;
 			}
@@ -97,7 +98,7 @@ public class State {
 				newState[agent] = 0;
 			}
 
-			return new State(newState, dimension, agent+1);
+			return new State(newState, dimension, (short) (agent+1));
 		}
 
 	}
@@ -110,10 +111,10 @@ public class State {
 		}
 		else
 		{
-			int[] newState = Arrays.copyOf(state, state.length);
+			short[] newState = Arrays.copyOf(state, state.length);
 			if(newState[agent+dimension] != 0)
 			{
-				int temp = newState[agent+dimension];
+				short temp = newState[agent+dimension];
 				newState[agent+dimension] = newState[agent];
 				newState[agent] = temp;
 			}
@@ -123,7 +124,7 @@ public class State {
 				newState[agent] = 0;
 			}
 
-			return new State(newState, dimension, agent+dimension);
+			return new State(newState, dimension, (short) (agent+dimension));
 		}
 
 	}
@@ -153,19 +154,19 @@ public class State {
 		return true;
 	}
 
-	public int[] getState() {
+	public short[] getState() {
 		return state;
 	}
 
-	public void setState(int[] state) {
+	public void setState(short[] state) {
 		this.state = state;
 	}
 
-	public Integer getDimension() {
+	public short getDimension() {
 		return dimension;
 	}
 
-	public void setDimension(Integer dimension) {
+	public void setDimension(short dimension) {
 		this.dimension = dimension;
 	}
 
@@ -175,6 +176,11 @@ public class State {
 
 	public void setAgent(int agent) {
 		this.agent = agent;
+	}
+	
+	public enum Positions
+	{
+		AGENT, A, B, C
 	}
 
 
