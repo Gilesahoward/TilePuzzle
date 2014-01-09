@@ -1,19 +1,10 @@
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -72,10 +63,6 @@ public class Grid {
 		finalState[squared-1] = -1;
 
 		this.finalState = new State(finalState, dimension, (short) (squared - 1));
-
-		System.out.println(Arrays.toString(state));
-		System.out.println(Arrays.toString(finalState));
-
 		initial = new Node(initialState);
 
 	}
@@ -90,7 +77,6 @@ public class Grid {
 		int nodesProcessed = 0;
 
 		stack.addFirst(initial);
-		//	set.add(initial);
 
 
 		while(!stack.isEmpty())
@@ -98,13 +84,11 @@ public class Grid {
 
 			Node temp = stack.removeFirst();
 			nodesProcessed++;
-			//System.out.println(Arrays.toString(temp.state.state));
-			/*	System.out.println("Set contains: " + set.size());
-			System.out.println("Queue contains: " + queue.size());*/
+
 			if(temp.getState().equals(finalState))
 			{
 				long endTime = System.currentTimeMillis();
-				//System.out.println("Success, ending dfs: " + set.size());
+
 
 				Deque<Grid.Direction> pathStack = new ArrayDeque<Grid.Direction>();
 				pathStack.add(temp.getDirection());
@@ -132,8 +116,6 @@ public class Grid {
 				}
 
 				return new Result(pathTaken.toString(), nodesProcessed, startTime-endTime);
-
-				//return temp;
 			}
 			if(!set.contains(temp))
 			{
@@ -166,27 +148,10 @@ public class Grid {
 
 			Node temp = queue.poll();
 			nodesProcessed++;
-			//System.out.println(Arrays.toString(temp.state.state));
-			/*	System.out.println("Set contains: " + set.size());
-			System.out.println("Queue contains: " + queue.size());*/
+			
 			if(temp.getState().equals(finalState))
 			{
 				long endTime = System.currentTimeMillis();
-				//System.out.println("Success, ending bfs: " + set.size());
-				/*				Deque<Grid.Direction> stack = new ArrayDeque<Grid.Direction>();
-				stack.add(temp.getDirection());
-				Node temp2 = temp.parent;
-
-				while(temp2.getParent() != null)
-				{
-					stack.addFirst(temp2.getDirection());
-					temp2 = temp2.getParent();
-				}
-
-				for(Grid.Direction d : stack)
-				{
-					System.out.println(d);
-				}*/
 				Deque<Grid.Direction> pathStack = new ArrayDeque<Grid.Direction>();
 				pathStack.add(temp.getDirection());
 				Node temp2 = temp.getParent();
@@ -216,15 +181,10 @@ public class Grid {
 			}
 			for(Node child : temp.successors())
 			{
-				//System.out.println(temp.successors().size());
 				if(!(set.contains(child)))
-				{//System.out.println("State not already seen!");
+				{
 					set.add(child);
 					queue.add(child);
-				}
-				else
-				{
-					//System.out.println("State already seen!");
 				}
 			}
 		}
@@ -235,7 +195,6 @@ public class Grid {
 	public Result iddfs_helper(Integer i)
 	{		
 		Deque<Node> stack = new ArrayDeque<Node>();
-		Set<Node> set = new HashSet<Node>();
 
 		int nodesProcessed = 0;
 
@@ -264,32 +223,20 @@ public class Grid {
 
 					StringBuilder pathTaken = new StringBuilder(pathStack.size());
 
-					if(pathStack.peek().toString().equals(null))
-					{
-
-					}
-					else
+					if(!pathStack.peek().toString().equals(null))
 					{
 						while(!pathStack.isEmpty())
 						{
-
 							pathTaken.append(pathStack.removeFirst().toString());
 						}
 					}
-
 					return new Result(pathTaken.toString(), nodesProcessed, endTime);
 				}
-
 				else
 				{
-					set.add(temp);
 					for(Node n: temp.successors())
 					{
-						if(!set.contains(n))
-						{
-							stack.addFirst(n);
-							set.add(n);
-						}
+						stack.addFirst(n);
 					}
 				}
 			}
@@ -322,13 +269,13 @@ public class Grid {
 	public Result astar()
 	{
 		long startTime = System.currentTimeMillis();
-		Set<Node> seen = new HashSet<Node>();
+		HashSet<HeuristicNode> seen = new HashSet<HeuristicNode>();
 		Queue<HeuristicNode> toConsider = new PriorityQueue<HeuristicNode>();
 		//Map<Node, Node> routesTaken = new HashMap<Node, Node>();
 
 		int nodesProcessed = 0;
 
-		toConsider.add(new HeuristicNode(initial, heuristic(initial)));
+		toConsider.add(new HeuristicNode(initial, 0));
 
 		while(!toConsider.isEmpty())
 		{
@@ -368,20 +315,24 @@ public class Grid {
 			}
 			else
 			{
-
-				seen.add(current.getNode());
+				seen.add(current);
 
 				for(Node n : current.getNode().successors())
 				{
-					if(!seen.contains(n))
+					int childFscore = n.getCost() + heuristic(n);
+					HeuristicNode newN = new HeuristicNode(n, childFscore);
+					if(!seen.contains(newN))
 					{
-						HeuristicNode newN = new HeuristicNode(n, heuristic(n));
-						//routesTaken.put(current, n);
-						toConsider.add(newN);
+						if(!toConsider.contains(newN) || toConsider.peek().getFscore() > childFscore)
+						{
+							//routesTaken.put(current, n);
+							toConsider.add(newN);
+						}
 					}
 				}
 			}
 		}
+
 		return null;
 
 	}
@@ -419,13 +370,13 @@ public class Grid {
 
 
 		}
-		total += n.getCost();
 		return total;
 	}
 
 	public static void main(String args[])
 	{
 		try {
+			String newline = System.getProperty("line.separator");
 			PrintWriter dfsWriter = new PrintWriter(new FileWriter("dfs.txt", true));
 			PrintWriter iddfsWriter = new PrintWriter(new FileWriter("iddfs.txt", true));
 			PrintWriter bfsWriter = new PrintWriter(new FileWriter("bfs.txt", true));
@@ -434,53 +385,46 @@ public class Grid {
 			for(short i = 4; i < 20; i++)
 			{
 				Grid test = new Grid(i);
+
 				Result r1 = test.iddfs();
 				long iddfs = r1.nodesExpanded;
-
-				Result r2 = test.bfs();
-				long bfs = r2.nodesExpanded;
-
-				Result r3 = test.dfs();
-				long dfs = r3.nodesExpanded;
-
-				Result r4 = test.astar();
-				long astar = r4.nodesExpanded;
-
-
-				StringBuilder dfsOutput = new StringBuilder();
-				dfsOutput.append("DFS for square grid of size: " + i);
-
-				dfsOutput.append(","+dfs);
-
-
-				dfsWriter.println(dfsOutput.toString());
-				dfsWriter.flush();
-
 				StringBuilder iddfsOutput = new StringBuilder();
-				iddfsOutput.append("IDDFS for square grid of size: " + i);
-
-				iddfsOutput.append(","+iddfs);
+				iddfsOutput.append("IDDFS for dimension " + i + newline + "depth: " + r1.path.length() + newline);
+				iddfsOutput.append("path: " + r1.path + newline);
+				iddfsOutput.append("nodes expanded: "+iddfs + newline);
 
 				iddfsWriter.println(iddfsOutput.toString());
 				iddfsWriter.flush();
 
+				Result r2 = test.bfs();
+				long bfs = r2.nodesExpanded;
 				StringBuilder bfsOutput = new StringBuilder();
-				bfsOutput.append("bfs for square grid of size: " + i);
-
-				bfsOutput.append(","+bfs);
+				bfsOutput.append("bfs for dimension " + i + newline + "depth: " + r2.path.length() + newline);
+				bfsOutput.append("path: " + r2.path + newline);
+				bfsOutput.append("nodes expanded: "+bfs + newline);
 
 				bfsWriter.println(bfsOutput.toString());
 				bfsWriter.flush();
 
+				Result r3 = test.dfs();
+				long dfs = r3.nodesExpanded;
+				StringBuilder dfsOutput = new StringBuilder();
+				dfsOutput.append("DFS for dimension " + i + newline + "depth: " + r3.path.length() + newline);
+				dfsOutput.append(System.getProperty("line.separator"));
+				dfsOutput.append("nodes expanded: "+dfs + newline);
+
+				dfsWriter.println(dfsOutput.toString());
+				dfsWriter.flush();
+
+				Result r4 = test.astar();
+				long astar = r4.nodesExpanded;
 				StringBuilder astarOutput = new StringBuilder();
-				astarOutput.append("astar for square grid of size: " + i);
-				astarOutput.append(","+astar);
+				astarOutput.append("astar for dimension " + i + newline + "depth: " + r4.path.length() + newline);
+				astarOutput.append("path: " + r4.path + newline);
+				astarOutput.append("nodes expanded: "+astar + newline);
 
 				astarWriter.println(astarOutput.toString());
 				astarWriter.flush();
-
-
-
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

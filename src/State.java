@@ -5,7 +5,7 @@ public class State {
 
 	private short[] state;
 	private short dimension;
-	private int agent;
+	private short agent;
 
 	public State(short[] state, short dimension, short agent)
 	{
@@ -59,7 +59,6 @@ public class State {
 			short[] newState = Arrays.copyOf(state, state.length);
 			if(newState[agent-dimension] != 0)
 			{
-				//System.out.println("Positions equal. Forcing tile up.");
 				short temp = newState[agent-dimension];
 				newState[agent-dimension] = newState[agent];
 				newState[agent] = temp;
@@ -87,7 +86,6 @@ public class State {
 			
 			if(newState[agent+1] != 0)
 			{
-				//System.out.println("Positions equal. Forcing tile right.");
 				short temp = newState[agent+1];
 				newState[agent+1] = newState[agent];
 				newState[agent] = temp;
@@ -170,11 +168,11 @@ public class State {
 		this.dimension = dimension;
 	}
 
-	public int getAgent() {
+	public short getAgent() {
 		return agent;
 	}
 
-	public void setAgent(int agent) {
+	public void setAgent(short agent) {
 		this.agent = agent;
 	}
 	
